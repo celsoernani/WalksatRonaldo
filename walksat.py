@@ -106,7 +106,7 @@ def run_sat(clauses, n_vars, lit_clause, max_flips_proportion=4):
             clause_index = random.choice(unsatisfied_clauses_index)
             unsatisfied_clause = clauses[clause_index]
             
-            clausulas_insatisfeitas.append(unsatisfied_clause)
+            clausulas_insatisfeitas.append(str(unsatisfied_clause))
             y_graf_erro.append(contagem_de_erros)
             contagem_de_erros = contagem_de_erros + 1
             ##computando erros e acertos
@@ -127,18 +127,35 @@ def main():
     print("M", m)
     print("N", n_vars)
 
-    m_list = [10, 20, 180,50]
-    n_list = [10,34, 50, 400]
-    list_time = [1.8050298690795898, 1.8818731307983398,  2.1404731273651123,  2.752943754196167]
+    m_list = [10, 20, 180,50,50]
+    n_list = [10,34, 50, 400,500]
+    list_time = [1.8050298690795898, 1.8818731307983398,  2.1404731273651123, 2.201709270477295, 2.752943754196167]
+    list_time_dpll = [0, 0, 0.0029845237731933594,0.0039861202239990234, 0.042881011962890625]
 
     fig, ax = plt.subplots()
     ax.plot(n_list, m_list, label="M/N")
-    fig.suptitle('Razão M/N de acordo com o testes feitoos')
+    fig.suptitle('Razão M/N de acordo com o testes feitos')
     
     inicio = time.time()
     solution,clausulas_insatisfeitas,y_graf_erro  = run_sat(clauses, n_vars, lit_clause)
     fim = time.time()
     print("Tempo de execução", fim - inicio)
+
+
+    fig, ax = plt.subplots( figsize=(15, 10))
+    ax.plot(clausulas_insatisfeitas, y_graf_erro, label="Clausulas não encontradas .")
+    ax.legend()
+
+    plt.show()
+
+    plt.plot( n_list, list_time_dpll,linewidth=2.0 , label = "DPLL")
+    plt.plot(n_list,list_time , linewidth=2.0 , label = "WalkSat")
+    plt.legend()
+
+    plt.show()
+
+
+
 
     ##Pritando se foi satisfeito ou nao
     print ('s SATISFIABLE')
