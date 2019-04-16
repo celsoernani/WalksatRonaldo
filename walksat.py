@@ -1,6 +1,9 @@
 import random
 import sys
 import matplotlib.pyplot as plt
+import seaborn as sns
+import time
+
 
 
 ##formato nas expressões 1 2 3 4 5 0 onde cada Números positivos denotam as variáveis ​​correspondentes.
@@ -75,6 +78,7 @@ def compute_broken(clause, true_sat_lit, lit_clause, omega=0.4):
         elif break_score == break_min:
             best_literals.append(literal)
 
+
     if break_min != 0 and random.random() < omega:
         best_literals = clause
 
@@ -83,6 +87,9 @@ def compute_broken(clause, true_sat_lit, lit_clause, omega=0.4):
 
 def run_sat(clauses, n_vars, lit_clause, max_flips_proportion=4): 
     max_flips = n_vars * max_flips_proportion
+    clausulas_insatisfeitas = []
+    contagem_de_erros = 1
+    y_graf_erro = []
     while 1:
         interpretation = get_random_interpretation(n_vars)
         true_sat_lit = get_true_sat_lit(clauses, interpretation)
@@ -93,12 +100,15 @@ def run_sat(clauses, n_vars, lit_clause, max_flips_proportion=4):
                                          not true_lit]
 
             if not unsatisfied_clauses_index:
-                return interpretation
+                return interpretation,clausulas_insatisfeitas,y_graf_erro
 
             ##se nao for satisfeito ele escolhe outra clausula aleatoriamente
             clause_index = random.choice(unsatisfied_clauses_index)
             unsatisfied_clause = clauses[clause_index]
-
+            
+            clausulas_insatisfeitas.append(unsatisfied_clause)
+            y_graf_erro.append(contagem_de_erros)
+            contagem_de_erros = contagem_de_erros + 1
             ##computando erros e acertos
             lit_to_flip = compute_broken(unsatisfied_clause, true_sat_lit, lit_clause)
             ##atualiazndo a nova pesquisa
@@ -106,15 +116,29 @@ def run_sat(clauses, n_vars, lit_clause, max_flips_proportion=4):
             interpretation[abs(lit_to_flip)] *= -1
 
             ##caso não tenha uma solução ele ficará num looping eterno procurando um clausula
-
+  
 
 def main():
     ##lendo as variaveis do arquivo 'clausulas, 
     clauses, n_vars, lit_clause = parse(sys.argv[1])
+    
+    
+    m = len(clauses)
+    print("M", m)
+    print("N", n_vars)
 
-    solution = run_sat(clauses, n_vars, lit_clause)
+    m_list = [10, 20, 180,50]
+    n_list = [10,34, 50, 400]
+    list_time = [1.8050298690795898, 1.8818731307983398,  2.1404731273651123,  2.752943754196167]
 
-
+    fig, ax = plt.subplots()
+    ax.plot(n_list, m_list, label="M/N")
+    fig.suptitle('Razão M/N de acordo com o testes feitoos')
+    
+    inicio = time.time()
+    solution,clausulas_insatisfeitas,y_graf_erro  = run_sat(clauses, n_vars, lit_clause)
+    fim = time.time()
+    print("Tempo de execução", fim - inicio)
 
     ##Pritando se foi satisfeito ou nao
     print ('s SATISFIABLE')
