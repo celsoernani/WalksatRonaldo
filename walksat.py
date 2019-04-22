@@ -87,31 +87,34 @@ def compute_broken(clause, true_sat_lit, lit_clause, omega=0.4):
 
 def run_sat(clauses, n_vars, lit_clause, max_flips_proportion=4): 
     max_flips = n_vars * max_flips_proportion
-    clausulas_insatisfeitas = []
-    contagem_de_erros = 1
-    y_graf_erro = []
+    clauses_unsatisfied = []
+    count_mistakes = 0
+    y_graf_wrong = []
     while 1:
         interpretation = get_random_interpretation(n_vars)
         true_sat_lit = get_true_sat_lit(clauses, interpretation)
         for _ in range(max_flips):
-            ##percorrendo todas as causas de inversões maximas, se a clausula de interpretação estiver 
+            ##percorrendo todas as vezes que é para porucrar clausula, se a clausula de interpretação estiver 
             ##nao preenche o vetor
             unsatisfied_clauses_index = [index for index, true_lit in enumerate(true_sat_lit) if
                                          not true_lit]
-
+            
+            #caso a lista de clasulas seja vazia, ele retorna a solução mais outras variaveis para gerar o grafico
             if not unsatisfied_clauses_index:
-                return interpretation,clausulas_insatisfeitas,y_graf_erro
+                return interpretation,clauses_unsatisfied,y_graf_wrong
 
-            ##se nao for satisfeito ele escolhe outra clausula aleatoriamente
+            ##se nao for satisfeito ele escolhe outra clausula aleatoriamente nao satisfeita
             clause_index = random.choice(unsatisfied_clauses_index)
             unsatisfied_clause = clauses[clause_index]
             
-            clausulas_insatisfeitas.append(str(unsatisfied_clause))
-            y_graf_erro.append(contagem_de_erros)
-            contagem_de_erros = contagem_de_erros + 1
+            ##variaveis para geração de grafico
+            clauses_unsatisfied.append(str(unsatisfied_clause))
+            y_graf_wrong.append(count_mistakes)
+            count_mistakes = count_mistakes + 1 ##conta como erro
             ##computando erros e acertos
+
             lit_to_flip = compute_broken(unsatisfied_clause, true_sat_lit, lit_clause)
-            ##atualiazndo a nova pesquisa
+            ##atualiazndo o tamanho nova pesquisa
             update_tsl(lit_to_flip, true_sat_lit, lit_clause)
             interpretation[abs(lit_to_flip)] *= -1
 
@@ -122,42 +125,45 @@ def main():
     ##lendo as variaveis do arquivo 'clausulas, 
     clauses, n_vars, lit_clause = parse(sys.argv[1])
     
-    
+    ##Gerando graficos para comparação
     m = len(clauses)
     print("M", m)
     print("N", n_vars)
-
     m_list = [10, 20, 180,50,50]
     n_list = [10,34, 50, 400,500]
     list_time = [1.8050298690795898, 1.8818731307983398,  2.1404731273651123, 2.201709270477295, 2.752943754196167]
     list_time_dpll = [0, 0, 0.0029845237731933594,0.0039861202239990234, 0.042881011962890625]
-
     fig, ax = plt.subplots()
     ax.plot(n_list, m_list, label="M/N")
     fig.suptitle('Razão M/N de acordo com o testes feitos')
-    
+    ##Gerando graficos para comparação
+
+
+
+    ##Calculando tempo de execução
     inicio = time.time()
-    solution,clausulas_insatisfeitas,y_graf_erro  = run_sat(clauses, n_vars, lit_clause)
+    solution,clauses_unsatisfied,y_graf_wrong  = run_sat(clauses, n_vars, lit_clause)
     fim = time.time()
     print("Tempo de execução", fim - inicio)
-
-
+    ##Calculando tempo de execução
+    
+    
+    ##Gerando graficos para comparação
     fig, ax = plt.subplots( figsize=(15, 10))
-    ax.plot(clausulas_insatisfeitas, y_graf_erro, label="Clausulas não encontradas .")
+    ax.plot(clauses_unsatisfiedd, y_graf_erro, label="Clausulas não encontradas .")
     ax.legend()
-
     plt.show()
-
     plt.plot( n_list, list_time_dpll,linewidth=2.0 , label = "DPLL")
     plt.plot(n_list,list_time , linewidth=2.0 , label = "WalkSat")
     plt.legend()
-
     plt.show()
+    ##Gerando graficos para comparação
 
 
 
 
-    ##Pritando se foi satisfeito ou nao
+
+    ##Pritando se foi satisfeito ou nao 
     print ('s SATISFIABLE')
     print ('v ' + ' '.join(map(str, solution[1:])) + ' 0')
 
